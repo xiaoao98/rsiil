@@ -25,10 +25,12 @@
 #include "Utilities/filters.h"
 #include "Utilities/tools.h"
 
+#include <iostream>  
+#include <chrono> 
 
 
 int main(int argc, char **argv) {
-
+	auto time0 = std::chrono::high_resolution_clock::now(); 
 	// Read parameters
 	clo_usage("Copy-move forgery detection based on Zernike moments or dense SIFT and PatchMatch");
 	clo_help(" NOTE: Input (<) and output (>) sequences are specified by their paths in printf format.\n");
@@ -80,6 +82,10 @@ int main(int argc, char **argv) {
 	imSize.nChannels = 1;
 	imSize.whc = imSize.wh;
 
+	auto time1 = std::chrono::high_resolution_clock::now();    
+    std::chrono::duration<double, std::milli> time_span1 = time1 - time0;   
+    std::cout << "Time taken by loading image: "  
+         << time_span1.count() << " milliseconds" << std::endl; 
 	// Create the Zernike moments, or other SIFT descriptors
 	FeatManager* fm;
 	if(mtd == 0)
@@ -102,15 +108,30 @@ int main(int argc, char **argv) {
 	clvSize.whc *= 3;
 	std::vector<float> clvisual(clvSize.whc);
 
+	auto time2 = std::chrono::high_resolution_clock::now();    
+    std::chrono::duration<double, std::milli> time_span2 = time2 - time1;   
+    std::cout << "Time taken by Zernike or sift: "  
+         << time_span2.count() << " milliseconds" << std::endl; 
+
 	/// Compute the matching using Patchmatch
 	Patchmatch pm(*fm, th1);
 	pm.initializeRandom();
 	pm.propagateNtimes(N);
 
+	auto time3 = std::chrono::high_resolution_clock::now();    
+    std::chrono::duration<double, std::milli> time_span3 = time3 - time2;   
+    std::cout << "Time taken by patch match: "  
+         << time_span3.count() << " milliseconds" << std::endl; 
+
 	// extract the displacement maps from the matching result of PatchMatch
 	std::vector<int> dispX;
 	std::vector<int> dispY;
 	pm.extract(dispX,dispY);
+
+	auto time4 = std::chrono::high_resolution_clock::now();    
+    std::chrono::duration<double, std::milli> time_span4 = time4 - time3;   
+    std::cout << "Time taken by extract results of patch match: "  
+         << time_span4.count() << " milliseconds" << std::endl; 
 
 	/// Median filtering of the displacement maps
 	medianFilter(dispX, visualSize, radius_m, true);
@@ -150,6 +171,11 @@ int main(int argc, char **argv) {
 
 	/// Dilate the rest 
 	dilationFilter(detectionMask, visualSize, radius_d);
+
+	auto time5 = std::chrono::high_resolution_clock::now();    
+    std::chrono::duration<double, std::milli> time_span5 = time5 - time4;   
+    std::cout << "Time taken by extract results of patch match: "  
+         << time_span5.count() << " milliseconds" << std::endl; 
 
 	// Save the final detection mask
 	visual.assign(detectionMask.begin(), detectionMask.end());
@@ -197,6 +223,11 @@ int main(int argc, char **argv) {
 		//file << "This image IS NOT a forgery" << endl;
 	//file.close();
 	delete fm;
+
+	auto time6 = std::chrono::high_resolution_clock::now();    
+    std::chrono::duration<double, std::milli> time_span6 = time6 - time0;   
+    std::cout << "Time taken by whole process: "  
+         << time_span6.count() << " milliseconds" << std::endl; 
 
 	return 0;
 }
