@@ -24,6 +24,8 @@
 #include "Utilities/PatchMatch/patchmatch.h"
 #include "Utilities/filters.h"
 #include "Utilities/tools.h"
+#include <fstream>  
+#include <sstream>
 
 
 
@@ -108,14 +110,49 @@ int main(int argc, char **argv) {
 	pm.propagateNtimes(N);
 
 	// extract the displacement maps from the matching result of PatchMatch
-	std::vector<int> dispX;
-	std::vector<int> dispY;
-	pm.extract(dispX,dispY);
+	// std::vector<int> dispX;
+	// std::vector<int> dispY;
+	// pm.extract(dispX,dispY);
 
+	//addTest
+	std::ifstream inFile1("/rsrch8/scratch/canbio/zyu7/copy-move/new-rsill/rsiil/detection_methods/patch_match/forgery-detection-visualization/build/bin/disp_x.csv");  // your csv file  
+    std::vector<int> dispX; // the vector to hold the read data  
+    std::string line1;  
+    std::string cell1;  
+
+    while (std::getline(inFile1, line1)) { // get the lines of the csv file  
+        std::stringstream ss(line1);  
+        while (std::getline(ss, cell1, ',')) { // split the line by ','  
+             dispX.push_back(std::stoi(cell1)); // convert string to int and put the data into the vector  
+        }  
+    }  
+
+	std::ifstream inFile2("/rsrch8/scratch/canbio/zyu7/copy-move/new-rsill/rsiil/detection_methods/patch_match/forgery-detection-visualization/build/bin/disp_y.csv");  // your csv file  
+    std::vector<int> dispY; // the vector to hold the read data  
+    std::string line2;  
+    std::string cell2;  
+
+    while (std::getline(inFile2, line2)) { // get the lines of the csv file  
+        std::stringstream ss(line2);  
+        while (std::getline(ss, cell2, ',')) { // split the line by ','  
+             dispY.push_back(std::stoi(cell2)); // convert string to int and put the data into the vector  
+        }  
+    }
+	std::cout << "dispX: ";  
+	for(int i=0; i<100; i++){   
+		std::cout << dispX[i] << ' ';  
+	}   
+	std::cout << std::endl; 
+
+	std::cout << "dispY: ";  
+	for(int i=0; i<100; i++){   
+		std::cout << dispY[i] << ' ';  
+	}   
+	std::cout << std::endl; 
 	/// Median filtering of the displacement maps
 	medianFilter(dispX, visualSize, radius_m, true);
 	medianFilter(dispY, visualSize, radius_m, false); 
-	
+	std::cout << "here" << endl;
 	// Save the filtered displacement map
 	//view_displacement(clvisual, clvSize, dispX, dispY);
 	// rescale(clvisual, clvSize);
@@ -124,7 +161,7 @@ int main(int argc, char **argv) {
 
 	std::vector<bool> detectionMask(visualSize.wh);
 	std::vector<float> visual(dispX.size());
-
+	std::cout << "here!" << endl;
 	/// compute error detection map
 	errorDetectionFilter(detectionMask, dispX, dispY, visualSize, radius_e, th_e, sp, visual); 
 	std::vector<int> matchIds(detectionMask.size()); // Label of each detected object
@@ -138,7 +175,7 @@ int main(int argc, char **argv) {
 	//rescale(visual, visualSize);
 	//temp_path = "detectionMask.png";
 	//saveImage(temp_path.c_str(), visual, visualSize, 0., 255.); 
-
+	std::cout << "here!!" << endl;
 	/// Compute connected components + remove the small ones
 	sizeFilter(detectionMask, visualSize, th_s);
 
