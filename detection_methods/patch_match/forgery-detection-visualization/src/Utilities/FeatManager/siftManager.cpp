@@ -18,11 +18,11 @@
  **/
 
 #include "siftManager.h"
+#include <iostream>
 
 SiftManager::SiftManager(const std::vector<float>& image, ImageSize dsz, int binSize, bool flip)
 {
 	std::vector<float> temp(image.size());
-
 	// Smooth the image using the blur kernel in the VLFeat documentation for the first scale
 	// (For now dense SIFT is only computed at the first scale, no multiscale matching is done)
 	float sigma = std::sqrt((binSize*binSize)/9 - 0.25);
@@ -47,8 +47,7 @@ SiftManager::SiftManager(const std::vector<float>& image, ImageSize dsz, int bin
 
 	const float* descr = vl_dsift_get_descriptors(filter);
 	features1.resize(descSize.whc);
-	for(int i = 0; i < descSize.whc; ++i)
-		features1[i] = descr[i];
+	std::copy(descr, descr + descSize.whc, features1.begin());
 
 	if(flip)
 	{
@@ -102,67 +101,26 @@ unsigned SiftManager::getNeighboringFeat(unsigned id, int type)
 	int x = id % width;
 	int y = id / width;
 
-	// Right
-	if(type == 0)
-	{
-		if(x+1 < width)
-			return (x+1)+y*width;
-		return id;
-	}
-	// Up
-	else if(type == 1)
-	{
-		if(y+1 < height)
-			return x+(y+1)*width;
-		return id;
-	}
-	// Up-Right
-	else if(type == 2)
-	{
-		if(y+1 < height && x+1 < width)
-			return (x+1)+(y+1)*width;
-		return id;
-	}
-	// Up-Left
-	else if(type == 3)
-	{
-		if(x-1 >= 0 && y+1 < height)
-			return (x-1)+(y+1)*width;
-		return id;
-	}
-	// Left
-	else if(type == 4)
-	{
-		if(x-1 >= 0)
-			return (x-1)+y*width;
-		return id;
-	}
-	// Down
-	else if(type == 5)
-	{
-		if(y-1 >= 0)
-			return x+(y-1)*width;
-		return id;
-	}
-	// Down-Left
-	else if(type == 6)
-	{
-		if(x-1 >= 0 && y-1 >= 0)
-			return (x-1)+(y-1)*width;
-		return id;
-	}
-	// Down-Right
-	else if(type == 7)
-	{
-		if(y-1 >= 0 && x+1 < width)
-			return (x+1)+(y-1)*width;
-		return id;
-	}
-	else
-	{
-		// This type of propagation doesn't exist ...
-		return 0;
-	}
+	switch (type) {  
+        case 0: // Right  
+            return (x+1 < width) ? (x+1)+y*width : id;  
+        case 1: // Up  
+            return (y+1 < height) ? x+(y+1)*width : id;  
+        case 2: // Up-Right  
+            return (y+1 < height && x+1 < width) ? (x+1)+(y+1)*width : id;  
+        case 3: // Up-Left  
+            return (x-1 >= 0 && y+1 < height) ? (x-1)+(y+1)*width : id;  
+        case 4: // Left  
+            return (x-1 >= 0) ? (x-1)+y*width : id;  
+        case 5: // Down  
+            return (y-1 >= 0) ? x+(y-1)*width : id;  
+        case 6: // Down-Left  
+            return (x-1 >= 0 && y-1 >= 0) ? (x-1)+(y-1)*width : id;  
+        case 7: // Down-Right  
+            return (y-1 >= 0 && x+1 < width) ? (x+1)+(y-1)*width : id;  
+        default: // This type of propagation doesn't exist ...  
+            return 0;  
+     } 
 }
 
 unsigned SiftManager::getInverseNeighboringFeat(unsigned id, int type)
@@ -174,65 +132,44 @@ unsigned SiftManager::getInverseNeighboringFeat(unsigned id, int type)
 	int x = id % width;
 	int y = id / width;
 
-	// Right
-	if(type == 4)
-	{
-		if(x+1 < width)
-			return (x+1)+y*width;
-		return id;
-	}
-	// Up
-	else if(type == 5)
-	{
-		if(y+1 < height)
-			return x+(y+1)*width;
-		return id;
-	}
-	// Up-Right
-	else if(type == 6)
-	{
-		if(y+1 < height && x+1 < width)
-			return (x+1)+(y+1)*width;
-		return id;
-	}
-	// Up-Left
-	else if(type == 7)
-	{
-		if(x-1 >= 0 && y+1 < height)
-			return (x-1)+(y+1)*width;
-		return id;
-	}
-	// Left
-	else if(type == 0)
-	{
-		if(x-1 >= 0)
-			return (x-1)+y*width;
-		return id;
-	}
-	// Down
-	else if(type == 1)
-	{
-		if(y-1 >= 0)
-			return x+(y-1)*width;
-		return id;
-	}
-	// Down-Left
-	else if(type == 2)
-	{
-		if(x-1 >= 0 && y-1 >= 0)
-			return (x-1)+(y-1)*width;
-		return id;
-	}
-	// Down-Right
-	else if(type == 3)
-	{
-		if(y-1 >= 0 && x+1 < width)
-			return (x+1)+(y-1)*width;
-		return id;
-	}
-	else
-	{
-		// This type of propagation doesn't exist ...
-		return 0;
-	}
+	int newX, newY;  
+	
+	switch(type)  
+	{  
+		case 0: // Left  
+			newX = x-1;  
+			newY = y;  
+			break;  
+		case 1: // Down  
+			newX = x;  
+			newY = y-1;  
+			break;  
+		case 2: // Down-Left  
+			newX = x-1;  
+			newY = y-1;  
+			break;  
+		case 3: // Down-Right  
+			newX = x+1;  
+			newY = y-1;  
+			break;  
+		case 4: // Right  
+			newX = x+1;  
+			newY = y;  
+			break;  
+		case 5: // Up  
+			newX = x;  
+			newY = y+1;  
+			break;  
+		case 6: // Up-Right  
+			newX = x+1;  
+			newY = y+1;  
+			break;  
+		case 7: // Up-Left  
+			newX = x-1;  
+			newY = y+1;  
+			break;  
+		default: // This type of propagation doesn't exist ...  
+			return 0;  
+	}  
+	return (newX >= 0 && newX < width && newY >= 0 && newY < height) ? newX + newY * width : id;
 }
