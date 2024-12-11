@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
 
 	auto time5 = std::chrono::high_resolution_clock::now();    
     std::chrono::duration<double, std::milli> time_span5 = time5 - time4;   
-    std::cout << "Time taken by extract results of patch match: "  
+    std::cout << "Time taken by filtering: "  
          << time_span5.count() << " milliseconds" << std::endl; 
 
 	// Save the final detection mask
