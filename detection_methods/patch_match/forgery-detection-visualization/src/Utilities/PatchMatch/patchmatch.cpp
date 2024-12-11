@@ -49,7 +49,7 @@ int Patchmatch::initializeRandom()
 	// For each patch compute a valid random match as well as the distance the patch and its match
 	#ifdef _OPENMP
 		std::cout << "OpenMP is activated. Maximum number of threads: " << omp_get_max_threads() << std::endl;
-		#pragma omp parallel for schedule(dynamic) num_threads(4)
+		#pragma omp parallel for schedule(dynamic) num_threads(8)
 	#endif
 	for (unsigned id = 0; id < imSize.wh; ++id)
 	{
