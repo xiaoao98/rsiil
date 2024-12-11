@@ -18,6 +18,7 @@
  **/
 
 #include "patchmatch.h"
+#include <iostream>
 
 static int rand_gen(int i)
 {
@@ -43,11 +44,13 @@ int Patchmatch::initializeRandom()
 	int matchId;
 	int offset;
 	int dif1, dif2;
+	std::cout << "code changed! " << std::endl;
 
 	// For each patch compute a valid random match as well as the distance the patch and its match
-#ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic) num_threads(NTHREAD)
-#endif
+	#ifdef _OPENMP
+		std::cout << "OpenMP is activated. Maximum number of threads: " << omp_get_max_threads() << std::endl;
+		#pragma omp parallel for schedule(dynamic) num_threads(NTHREAD)
+	#endif
 	for (unsigned id = 0; id < imSize.wh; ++id)
 	{
 		do {
@@ -57,7 +60,7 @@ int Patchmatch::initializeRandom()
 		matches[id] = matchId;
 		distances[id] = fm->distance(id, matchId);
 	}
-
+	// std::cout << imSize.wh << std::endl;
 	return 0;
 }
 
