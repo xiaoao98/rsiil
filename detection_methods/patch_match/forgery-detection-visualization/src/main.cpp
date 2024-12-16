@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
 	// pm.extract(dispX,dispY);
 
 	//addTest
-	std::ifstream inFile1("/rsrch8/scratch/canbio/zyu7/copy-move/new-rsill/rsiil/detection_methods/patch_match/forgery-detection-visualization/build/bin/disp_x.csv");  // your csv file  
+	std::ifstream inFile1("/rsrch8/scratch/canbio/zyu7/python-copy-move/disp_x.csv");  // your csv file  
     std::vector<int> dispX; // the vector to hold the read data  
     std::string line1;  
     std::string cell1;  
@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
         }  
     }  
 
-	std::ifstream inFile2("/rsrch8/scratch/canbio/zyu7/copy-move/new-rsill/rsiil/detection_methods/patch_match/forgery-detection-visualization/build/bin/disp_y.csv");  // your csv file  
+	std::ifstream inFile2("/rsrch8/scratch/canbio/zyu7/python-copy-move/disp_y.csv");  // your csv file  
     std::vector<int> dispY; // the vector to hold the read data  
     std::string line2;  
     std::string cell2;  
