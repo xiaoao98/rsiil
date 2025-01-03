@@ -114,8 +114,28 @@ int main(int argc, char **argv) {
 	// std::vector<int> dispY;
 	// pm.extract(dispX,dispY);
 
+	std::ofstream myfile;  
+    // myfile.open ("dispX_sift.csv");
+	// for(size_t i = 0; i < dispX.size(); ++i)  
+	// {  
+	// 	myfile << dispX[i];  
+	// 	if(i != dispX.size() - 1)  // To prevent comma at the end of the line  
+	// 		myfile << ",";  
+	// }  
+
+	// myfile.close(); 
+
+	// myfile.open ("dispY_sift.csv");
+	// for(size_t i = 0; i < dispY.size(); ++i)  
+	// {  
+	// 	myfile << dispY[i];  
+	// 	if(i != dispY.size() - 1)  // To prevent comma at the end of the line  
+	// 		myfile << ",";  
+	// }  
+
+	// myfile.close(); 
 	//addTest
-	std::ifstream inFile1("/rsrch8/scratch/canbio/zyu7/python-copy-move/disp_x.csv");  // your csv file  
+	std::ifstream inFile1("/rsrch8/scratch/canbio/zyu7/python-copy-move/disp_x_2.csv");  // your csv file  
     std::vector<int> dispX; // the vector to hold the read data  
     std::string line1;  
     std::string cell1;  
@@ -126,8 +146,9 @@ int main(int argc, char **argv) {
              dispX.push_back(std::stoi(cell1)); // convert string to int and put the data into the vector  
         }  
     }  
+	inFile1.close();
 
-	std::ifstream inFile2("/rsrch8/scratch/canbio/zyu7/python-copy-move/disp_y.csv");  // your csv file  
+	std::ifstream inFile2("/rsrch8/scratch/canbio/zyu7/python-copy-move/disp_y_2.csv");  // your csv file  
     std::vector<int> dispY; // the vector to hold the read data  
     std::string line2;  
     std::string cell2;  
@@ -138,6 +159,8 @@ int main(int argc, char **argv) {
              dispY.push_back(std::stoi(cell2)); // convert string to int and put the data into the vector  
         }  
     }
+	inFile2.close();
+
 	std::cout << "dispX: ";  
 	for(int i=0; i<100; i++){   
 		std::cout << dispX[i] << ' ';  
@@ -149,9 +172,31 @@ int main(int argc, char **argv) {
 		std::cout << dispY[i] << ' ';  
 	}   
 	std::cout << std::endl; 
+
 	/// Median filtering of the displacement maps
 	medianFilter(dispX, visualSize, radius_m, true);
 	medianFilter(dispY, visualSize, radius_m, false); 
+
+	myfile.open ("dispX_med.csv");
+	for(size_t i = 0; i < dispX.size(); ++i)  
+	{  
+		myfile << dispX[i];  
+		if(i != dispX.size() - 1)  // To prevent comma at the end of the line  
+			myfile << ",";  
+	}  
+
+	myfile.close(); 
+
+	myfile.open ("dispY_med.csv");
+	for(size_t i = 0; i < dispY.size(); ++i)  
+	{  
+		myfile << dispY[i];  
+		if(i != dispY.size() - 1)  // To prevent comma at the end of the line  
+			myfile << ",";  
+	}  
+
+	myfile.close(); 
+
 	std::cout << "here" << endl;
 	// Save the filtered displacement map
 	//view_displacement(clvisual, clvSize, dispX, dispY);
@@ -165,8 +210,30 @@ int main(int argc, char **argv) {
 	/// compute error detection map
 	errorDetectionFilter(detectionMask, dispX, dispY, visualSize, radius_e, th_e, sp, visual); 
 	std::vector<int> matchIds(detectionMask.size()); // Label of each detected object
+
+	myfile.open ("detectionMask.csv");
+	for(size_t i = 0; i < detectionMask.size(); ++i)  
+	{  
+		myfile << detectionMask[i];  
+		if(i != detectionMask.size() - 1)  // To prevent comma at the end of the line  
+			myfile << ",";  
+	}  
+
+	myfile.close(); 
+
+	myfile.open ("visual.csv");
+	for(size_t i = 0; i < visual.size(); ++i)  
+	{  
+		myfile << visual[i];  
+		if(i != visual.size() - 1)  // To prevent comma at the end of the line  
+			myfile << ",";  
+	}  
+
+	myfile.close(); 
+	
 	pm.get_detected_matches(matchIds,detectionMask);
 
+	
 	// Save the error as well as the initial detection mask
 //	rescale(visual, visualSize);
 	//temp_path = "errorMap.png";
